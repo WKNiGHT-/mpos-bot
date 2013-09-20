@@ -52,15 +52,15 @@ while True:
         url = urllib.urlopen('http://www.ejpool.info/index.php?page=api&action=getblocksfound&api_key=YOUR_API_ACCOUNT_KEY_HERE&limit=1')
         status = url.read()
         status = json.loads(status)
-        print status['getblocksfound'][0]['id']
-        print status['getblocksfound'][0]['height']
-        print status['getblocksfound'][0]['confirmations']
-        print status['getblocksfound'][0]['amount']
-        print status['getblocksfound'][0]['time']
-        print status['getblocksfound'][0]['difficulty']
-        print status['getblocksfound'][0]['shares']
-        print status['getblocksfound'][0]['finder']
-        irc.send ( 'PRIVMSG #elitist :' + 'Last Block: #' + str(status['getblocksfound'][0]['height']) + ' | Shares: ' + str(status['getblocksfound'][0]['shares']) + ' | Confirmations: ' + str(status['getblocksfound'][0]['confirmations']) + ' | Solved By: ' + str(status['getblocksfound'][0]['finder']) + '\n')
+        print status['getblocksfound']['data'][0]['id']
+        print status['getblocksfound']['data'][0]['height']
+        print status['getblocksfound']['data'][0]['confirmations']
+        print status['getblocksfound']['data'][0]['amount']
+        print status['getblocksfound']['data'][0]['time']
+        print status['getblocksfound']['data'][0]['difficulty']
+        print status['getblocksfound']['data'][0]['shares']
+        print status['getblocksfound']['data'][0]['finder']
+        irc.send ( 'PRIVMSG #elitist :' + 'Last Block: #' + str(status['getblocksfound']['data'][0]['height']) + ' | Shares: ' + str(status['getblocksfound']['data'][0]['shares']) + ' | Confirmations: ' + str(status['getblocksfound']['data'][0]['confirmations']) + ' | Solved By: ' + str(status['getblocksfound']['data'][0]['finder']) + '\n')
         
 #Change channel #elitist (2 Locations of #elitist)
     if data.find('#elitist :!ticker') != -1:
@@ -83,12 +83,12 @@ while True:
             url = urllib.urlopen('http://www.ejpool.info/index.php?page=api&action=getuserstatus&api_key=YOUR_ADMIN_API_KEY_HERE&id=' + userNick)
             data_parse = url.read()
             data_parse = json.loads(data_parse)
-            print data_parse['getuserstatus']['username']
-            print data_parse['getuserstatus']['hashrate']
-            print data_parse['getuserstatus']['shares']
-            print data_parse['getuserstatus']['shares']['valid']
-            print data_parse['getuserstatus']['shares']['invalid']
-            irc.send ( 'PRIVMSG #elitist :' + 'Username: ' + str(data_parse['getuserstatus']['username']) + ' | Hashrate: ' + str(data_parse['getuserstatus']['hashrate']) + ' kh/s' + ' | Shares Valid: ' + str(data_parse['getuserstatus']['shares']['valid']) + ' | Shares Invalid: ' + str(data_parse['getuserstatus']['shares']['invalid']) + '\n')
+            print data_parse['getuserstatus']['data']['username']
+            print data_parse['getuserstatus']['data']['hashrate']
+            print data_parse['getuserstatus']['data']['shares']
+            print data_parse['getuserstatus']['data']['shares']['valid']
+            print data_parse['getuserstatus']['data']['shares']['invalid']
+            irc.send ( 'PRIVMSG #elitist :' + 'Username: ' + str(data_parse['getuserstatus']['data']['username']) + ' | Hashrate: ' + str(data_parse['getuserstatus']['data']['hashrate']) + ' kh/s' + ' | Shares Valid: ' + str(data_parse['getuserstatus']['data']['shares']['valid']) + ' | Shares Invalid: ' + str(data_parse['getuserstatus']['data']['shares']['invalid']) + '\n')
 
 
         else:
@@ -105,20 +105,20 @@ while True:
         block = json.loads(block)
         block_height = str(block['getblocksfound'][0]['height'])
         try:
-            print block['getblocksfound'][0]['id']
-            print block['getblocksfound'][0]['height']
-            print block['getblocksfound'][0]['confirmations']
-            print block['getblocksfound'][0]['amount']
-            print block['getblocksfound'][0]['time']
-            print block['getblocksfound'][0]['difficulty']
-            print block['getblocksfound'][0]['shares']
-            print block['getblocksfound'][0]['finder']
+            print block['getblocksfound']['data'][0]['id']
+            print block['getblocksfound']['data'][0]['height']
+            print block['getblocksfound']['data'][0]['confirmations']
+            print block['getblocksfound']['data'][0]['amount']
+            print block['getblocksfound']['data'][0]['time']
+            print block['getblocksfound']['data'][0]['difficulty']
+            print block['getblocksfound']['data'][0]['shares']
+            print block['getblocksfound']['data'][0]['finder']
             block_height = int(block['getblocksfound'][0]['height'])
             if prevblock_height == 0:
                 prevblock_height = block_height
             elif prevblock_height != block_height:
  
-                irc.send('PRIVMSG #elitist' +u' :BLOCK FOUND: ' + str(block['getblocksfound'][0]['height']) + ' | ' + str(block['getblocksfound'][0]['shares']) + ' shares | Amount: ' + str(block['getblocksfound'][0]['amount']) + ' | Found By ' + str(block['getblocksfound'][0]['finder']) + '\n') 
+                irc.send('PRIVMSG #elitist' +u' :BLOCK FOUND: ' + str(block['getblocksfound']['data'][0]['height']) + ' | ' + str(block['getblocksfound']['data'][0]['shares']) + ' shares | Amount: ' + str(block['getblocksfound']['data'][0]['amount']) + ' | Found By ' + str(block['getblocksfound']['data'][0]['finder']) + '\n') 
                 prevblock_height = block_height
         except IOError, e:
             print e[0], e[1]
