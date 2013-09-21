@@ -30,7 +30,7 @@ class IRC:
             return True
         return False
     def recv(self, size):
-        self.readbuffer = self.readbuffer + self.socket.recv(128)
+        self.readbuffer = self.readbuffer + self.socket.recv(size)
         self.data = string.split(self.readbuffer, "\n")
         self.readbuffer = self.data.pop()
         return self.data

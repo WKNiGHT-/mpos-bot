@@ -55,7 +55,7 @@ while True:
 
     try:
         if irc.check():
-            data = irc.recv(256)
+            data = irc.recv(4096)
     except Exception as exception:
         logging.exception('Failed to read from socket:')
 
