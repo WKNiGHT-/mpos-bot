@@ -28,8 +28,8 @@ class Commands:
             plugins.append({"name": i, "info": info})
         return plugins
 
-    def rehash(self, signum, stack):
-        self.logger.info('Rehash requested')
+    def rehash(self):
+        self.logger.info('Recreating command index')
         self.commands = self.getCommands()
         return True
 
@@ -38,7 +38,7 @@ class Commands:
         if line.find(':!') != -1:
             self.line = line
             strCommand = line.split(':!')[1].split(' ')[0]
-            self.logger.debug('Found a command string: ' + strCommand)
+            self.logger.debug('Found a command string: !' + strCommand)
             for command in self.commands:
                 if command['name'] == strCommand:
                     self.logger.debug('Found matching command: ' + command['name'])
