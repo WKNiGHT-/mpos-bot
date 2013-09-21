@@ -9,7 +9,6 @@ class Commands:
         self.logger = logging.getLogger()
         self.folder = './commands'
         self.commands = self.getCommands()
-        self.command = {}
         self.command_to_run = ''
         self.line = ''
 
