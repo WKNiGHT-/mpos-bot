@@ -68,8 +68,9 @@ while True:
         elif commands.check(line):
             try:
                 irc.send(commands.run())
-            except:
-                logging.debug('Failed to run command')
+            except Exception as exception:
+                logging.debug('Failed to run command: ' + str(type(exception)))
+                logging.debug('Command failed with  : ' + str(exception))
 
         if blockupdate.check():
             irc.send(blockupdate.getMessage())
