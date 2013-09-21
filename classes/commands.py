@@ -27,6 +27,11 @@ class Commands:
             plugins.append({"name": i, "info": info})
         return plugins
 
+    def rehash(self, signum, stack):
+        self.logger.info('Rehash requested')
+        self.commands = self.getCommands()
+        return True
+
     def check(self, line):
         """ Check if we have a command request """
         if line.find(':!') != -1:

@@ -3,6 +3,7 @@ import os
 import sys
 import ConfigParser
 import logging
+import signal
 
 sys.path.insert(1, './classes')
 from irc import *
@@ -44,14 +45,24 @@ commands.setConfig(settings)
 blockupdate = BlockUpdate()
 blockupdate.setConfig(settings)
 
+# Rehash if requested
+signal.signal(signal.SIGUSR1, commands.rehash)
+
 while True:
-    line = irc.recv(4096)
+    try:
+        line = irc.recv(4096)
+    except:
+        logging.debug('Skipped recv')
+
     logging.debug(line)
 
     if line.find ( 'PING' ) != -1:
         irc.send( 'PONG ' + line.split() [ 1 ] )
     elif commands.check(line):
-        irc.send(commands.run())
+        try:
+            irc.send(commands.run())
+        except:
+            logging.debug('Failed to run command')
 
     if blockupdate.check():
         irc.send(blockupdate.getMessage())
