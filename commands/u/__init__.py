@@ -2,7 +2,7 @@ import urllib
 import logging
 import json
 
-def run(line, config):
+def u_run_cmd(line, config):
     logger = logging.getLogger()
     userNick = line.split(':')[2].split(' ')
     logger.debug(userNick)

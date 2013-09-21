@@ -1,43 +1,31 @@
 #!/usr/bin/python -B
-import os
-import sys
-import ConfigParser
-import logging
-import signal
-import string
+import os, sys, ConfigParser, logging, signal, string, time
 
 sys.path.insert(1, './classes')
+sys.path.insert(1, './lib')
 from irc import *
 from blockupdate import *
 from commands import *
+import settings
 
 # Load our local configuration
 config = ConfigParser.RawConfigParser()
 if not config.read('conf/config.cfg'):
     raise RuntimeError('Failed to load configuration: conf/config.cfg')
+settings = settings.load(config)
 
-# Convert to numeric loglevel
+# Setup logging according to configuration
 numeric_level = getattr(logging, config.get('Logging', 'level').upper(), None)
 if not isinstance(numeric_level, int):
     raise ValueError('Invalid log level: %s' % config.get('Logging', 'level'))
 logging.basicConfig(format=config.get('Logging', 'format'), level=numeric_level)
 
-# Convert our config file
-settings = {}
-settings['host'] = config.get('IRC', 'host')
-settings['port'] = config.getint('IRC', 'port')
-settings['nick'] = config.get('IRC', 'nick')
-settings['user'] = config.get('IRC', 'user')
-settings['channel'] = config.get('IRC', 'channel')
-settings['interval'] = config.getint('Blockupdate', 'interval')
-settings['api_key'] = config.get('API', 'key')
-settings['api_url'] = config.get('API', 'url')
-
+# Create IRC Object and runn connect
 irc = IRC()
 irc.connect(settings['host'], settings['port'])
-irc.send( 'NICK ' + settings['nick'] )
-irc.send( 'USER ' + settings['user'])
-irc.send( 'JOIN ' + settings['channel'])
+irc.nick(settings['nick'])
+irc.user(settings['user'])
+irc.join(settings['channel'])
 
 # Load our commands
 commands = Commands()
@@ -47,26 +35,40 @@ commands.setConfig(settings)
 blockupdate = BlockUpdate()
 blockupdate.setConfig(settings)
 
-# Rehash if requested
-signal.signal(signal.SIGUSR1, commands.rehash)
+# What to do on a reload request
+def reload_bot(signum, stack):
+    commands.rehash()
 
-readbuffer=""
+# Call our reload function when receiving SIGUSR1
+signal.signal(signal.SIGUSR1, reload_bot)
+
 while True:
-    readbuffer=readbuffer+irc.recv(1024)
-    temp=string.split(readbuffer, "\n")
-    readbuffer=temp.pop( )
+    # Holds our lines returned from socket
+    data = {}
 
-    for line in temp:
-        line=string.rstrip(line)
+    # Check for a new block before checking IRC
+    try:
+        if blockupdate.check():
+            irc.send(blockupdate.getMessage())
+    except Exception as exception:
+        logging.exception('Failed to run blockupdate:')
+
+    try:
+        if irc.check():
+            data = irc.recv(4096)
+    except Exception as exception:
+        logging.exception('Failed to read from socket:')
+
+    for line in data:
+        # Remove '\r' from line
+        line = string.rstrip(line)
         logging.debug(line)
 
         if line.find ( 'PING' ) != -1:
-            irc.send( 'PONG ' + line.split() [ 1 ] )
+            irc.pong(line)
         elif commands.check(line):
             try:
                 irc.send(commands.run())
-            except:
-                logging.debug('Failed to run command')
-
-        if blockupdate.check():
-            irc.send(blockupdate.getMessage())
+            except Exception as exception:
+                logging.exception('Command execution failed:')
+    time.sleep(1)
