@@ -4,12 +4,14 @@ import sys
 import ConfigParser
 import logging
 import signal
+import string
 
 sys.path.insert(1, './classes')
 from irc import *
 from blockupdate import *
 from commands import *
 
+# Load our local configuration
 config = ConfigParser.RawConfigParser()
 if not config.read('conf/config.cfg'):
     raise RuntimeError('Failed to load configuration: conf/config.cfg')
@@ -48,21 +50,23 @@ blockupdate.setConfig(settings)
 # Rehash if requested
 signal.signal(signal.SIGUSR1, commands.rehash)
 
+readbuffer=""
 while True:
-    try:
-        line = irc.recv(4096)
-    except:
-        logging.debug('Skipped recv')
+    readbuffer=readbuffer+irc.recv(1024)
+    temp=string.split(readbuffer, "\n")
+    readbuffer=temp.pop( )
 
-    logging.debug(line)
+    for line in temp:
+        line=string.rstrip(line)
+        logging.debug(line)
 
-    if line.find ( 'PING' ) != -1:
-        irc.send( 'PONG ' + line.split() [ 1 ] )
-    elif commands.check(line):
-        try:
-            irc.send(commands.run())
-        except:
-            logging.debug('Failed to run command')
+        if line.find ( 'PING' ) != -1:
+            irc.send( 'PONG ' + line.split() [ 1 ] )
+        elif commands.check(line):
+            try:
+                irc.send(commands.run())
+            except:
+                logging.debug('Failed to run command')
 
-    if blockupdate.check():
-        irc.send(blockupdate.getMessage())
+        if blockupdate.check():
+            irc.send(blockupdate.getMessage())
