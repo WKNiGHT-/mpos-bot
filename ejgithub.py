@@ -52,9 +52,12 @@ signal.signal(signal.SIGUSR1, commands.rehash)
 
 readbuffer=""
 while True:
-    readbuffer=readbuffer+irc.recv(1024)
-    temp=string.split(readbuffer, "\n")
-    readbuffer=temp.pop( )
+    try:
+        readbuffer=readbuffer+irc.recv(1024)
+        temp=string.split(readbuffer, "\n")
+        readbuffer=temp.pop( )
+    except:
+        logging.debug('SIG received, skipped irc.recv')
 
     for line in temp:
         line=string.rstrip(line)
