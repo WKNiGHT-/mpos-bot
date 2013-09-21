@@ -4,6 +4,9 @@ import json
 
 def fortune_run_cmd(line, config):
     logger = logging.getLogger()
-    url = urllib.urlopen('http://www.iheartquotes.com/api/v1/random')
-    fortune = url.read()
+    data = urllib.urlopen('http://www.iheartquotes.com/api/v1/random').read(20000)
+    data = data.split('\n')
+    fortune= ''
+    for line in data:
+        fortune = fortune+' '+line
     return 'PRIVMSG ' + config['channel'] + ' :' + fortune
