@@ -2,7 +2,7 @@ import urllib
 import logging
 import json
 
-def run(line, config):
+def status_run_cmd(line, config):
     logger = logging.getLogger()
     url = urllib.urlopen(config['api_url'] + '&action=public')
     status = json.loads(url.read())

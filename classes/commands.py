@@ -9,7 +9,8 @@ class Commands:
         self.logger = logging.getLogger()
         self.folder = './commands'
         self.commands = self.getCommands()
-        self.command = ''
+        self.command = {}
+        self.command_to_run = ''
         self.line = ''
 
     def setConfig(self, config):
@@ -24,6 +25,7 @@ class Commands:
             if not os.path.isdir(location) or not MainModule + ".py" in os.listdir(location):
                 continue
             info = imp.find_module(MainModule, [location])
+            self.logger.debug('Found command: ' + i)
             plugins.append({"name": i, "info": info})
         return plugins
 
@@ -40,9 +42,13 @@ class Commands:
             self.logger.debug('Found a command string: ' + strCommand)
             for command in self.commands:
                 if command['name'] == strCommand:
-                    self.command = command
+                    self.logger.debug('Found matching command: ' + command['name'])
+                    self.command_to_run = command
                     return True
         return False
 
     def run(self):
-        return imp.load_module(MainModule, *self.command["info"]).run(self.line, self.config)
+        self.logger.debug(str(self.command_to_run))
+        module = imp.load_module(MainModule, *self.command_to_run["info"])
+        methodToCall = getattr(module, self.command_to_run['name'] + '_run_cmd')
+        return methodToCall(self.line, self.config)
