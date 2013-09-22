@@ -2,7 +2,7 @@ import urllib
 import logging
 import json
 
-def run(line, config):
+def ticker_run_cmd(line, config):
     logger = logging.getLogger()
     url = urllib.urlopen('https://btc-e.com/api/2/ltc_usd/ticker')
     data_parse = json.loads(url.read())
