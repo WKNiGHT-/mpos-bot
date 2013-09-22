@@ -5,9 +5,9 @@ import os
 MainModule = "__init__"
 
 class Commands:
-    def __init__(self):
-        self.logger = logging.getLogger()
-        self.folder = './commands'
+    def __init__(self, working_directory):
+        self.logger = logging.getLogger('bot.commands')
+        self.folder = working_directory + '/commands'
         self.commands = self.getCommands()
         self.command_to_run = ''
         self.line = ''
@@ -16,9 +16,12 @@ class Commands:
         self.config = config
 
     def getCommands(self):
-        self.logger.debug('Trying to find commands in ' + self.folder)
+        self.logger.info('Loading commands in ' + self.folder)
         plugins = []
-        possibleplugins = os.listdir(self.folder)
+        try:
+            possibleplugins = os.listdir(self.folder)
+        except:
+            self.logger.exception('Failed to read command folder ' + self.folder)
         for i in possibleplugins:
             location = os.path.join(self.folder, i)
             if not os.path.isdir(location) or not MainModule + ".py" in os.listdir(location):
@@ -47,7 +50,7 @@ class Commands:
         return False
 
     def run(self):
-        self.logger.debug(str(self.command_to_run))
+        self.logger.info('Running command: ' + self.command_to_run['name'])
         module = imp.load_module(MainModule, *self.command_to_run["info"])
         methodToCall = getattr(module, self.command_to_run['name'] + '_run_cmd')
         return methodToCall(self.line, self.config)
