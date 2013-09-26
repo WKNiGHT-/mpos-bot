@@ -55,7 +55,7 @@ def main():
     blockupdate = BlockUpdate()
     blockupdate.setConfig(settings)
 
-    # Create IRC Object and runn connect
+    # Create IRC Object and run connect
     irc = IRC()
     irc.connect(settings['host'], settings['port'])
     irc.nick(settings['nick'])
@@ -116,7 +116,8 @@ def run():
         try:
             main()
         except:
-            logger.exception('Failed to run worker process')
+            logger.exception('Failed to start worker process')
+            context.close()
 
 if __name__ == "__main__":
     run()
