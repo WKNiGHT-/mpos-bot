@@ -20,9 +20,10 @@ def status_run_cmd(line, config):
     jsonPublicData = json.loads(urlpublic.read())
     strEfficiency = str(jsonData['getpoolstatus']['data']['efficiency']) + '%'
     strDifficulty = str(round(jsonData['getpoolstatus']['data']['networkdiff'], 3))
-    strRoundEstimate = str(locale.format('%d', round(jsonData['getpoolstatus']['data']['estshares'], 0), grouping=True))
-    strCurrentRound = str(locale.format('%d', round(jsonPublicData['shares_this_round'], 0), grouping=True))
+    strRoundEstimate = str(int(jsonData['getpoolstatus']['data']['estshares']))
+    strCurrentRound = str(int(jsonPublicData['shares_this_round']))
     strHashrate = str(locale.format('%d', round(jsonPublicData['hashrate'], 2), grouping=True))
-    strPoolLuck = str(round(jsonPublicData['shares_this_round'] / jsonData['getpoolstatus']['data']['estshares'] * 100, 2))
+    strPoolLuck = str(round(int(jsonPublicData['shares_this_round']) / int(jsonData['getpoolstatus']['data']['estshares']) * 100, 2))
     strWorkers = str(jsonPublicData['workers'])
+    logger.info('Completed command')
     return 'PRIVMSG ' + config['channel'] + ' :Pool Hashrate: ' + strHashrate + ' khash | Pool Efficiency: ' + strEfficiency + ' | Current difficulty: ' + strDifficulty + ' | Round Estimate: ' + strRoundEstimate + ' | Current Round: ' + strCurrentRound + ' | Pool Luck: ' + strPoolLuck + '% | Workers: ' + strWorkers
