@@ -5,10 +5,19 @@ import locale
 
 def status_run_cmd(line, config):
     locale.setlocale(locale.LC_ALL, 'en_US')
-    logger = logging.getLogger()
+    logger = logging.getLogger('bot.cmd.status')
+    logger.debug('Opening URL for status command')
     url = urllib.urlopen(config['api_url'] + '&action=getpoolstatus&api_key=' + config['api_key'])
-    jsonData = json.loads(urllib.urlopen(config['api_url'] + '&action=getpoolstatus&api_key=' + config['api_key']).read())
-    jsonPublicData = json.loads(urllib.urlopen(config['api_url'] + '&action=public').read())
+    if url.getcode() != 200:
+        logger.error('Request failed with http error: ' + str(url.getcode()))
+        return False
+    logger.debug('Reading JSON data from response')
+    jsonData = json.loads(url.read())
+    urlpublic = urllib.urlopen(config['api_url'] + '&action=public')
+    if urlpublic.getcode() != 200:
+        logger.error('Request failed with http error: ' + str(url.getcode()))
+        return False
+    jsonPublicData = json.loads(urlpublic.read())
     strEfficiency = str(jsonData['getpoolstatus']['data']['efficiency']) + '%'
     strDifficulty = str(round(jsonData['getpoolstatus']['data']['networkdiff'], 3))
     strRoundEstimate = str(locale.format('%d', round(jsonData['getpoolstatus']['data']['estshares'], 0), grouping=True))
