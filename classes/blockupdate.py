@@ -8,6 +8,7 @@ class BlockUpdate:
     def __init__(self):
         self.last_fast_check = datetime.datetime.now()
         self.logger = logging.getLogger('bot.blockupdate')
+        self.logger.info('Initilized blockupdater')
         self.prevblock_height = 0
         self.message = ''
         self.errorcount = 0
@@ -20,7 +21,7 @@ class BlockUpdate:
         if not self.enabled:
             return False
         if self.last_fast_check < (datetime.datetime.now() - datetime.timedelta(seconds=self.config['interval'])):
-            self.logger.info('Checking for new block')
+            self.logger.debug('Checking for new block')
             self.last_fast_check = datetime.datetime.now()
             url = urllib.urlopen(self.config['api_url'] + '&action=getblocksfound&api_key=' + self.config['api_key'] + '&limit=1')
             if url.getcode() != 200:
