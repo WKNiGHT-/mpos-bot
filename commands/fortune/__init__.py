@@ -9,4 +9,5 @@ def fortune_run_cmd(line, config):
     fortune= ''
     for line in data:
         fortune = fortune+' '+line
+    logger.info('Completed command')
     return 'PRIVMSG ' + config['channel'] + ' :' + fortune

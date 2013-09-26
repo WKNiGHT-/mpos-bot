@@ -10,4 +10,5 @@ def last_run_cmd(line, config):
         logger.error('Request failed with http error: ' + str(url.getcode()))
         return False
     jsonData = json.loads(url.read())
+    logger.info('Completed command')
     return 'PRIVMSG ' + config['channel'] + ' :' + 'Last Block: #' + str(jsonData['getblocksfound']['data'][0]['height']) + ' | Shares: ' + str(jsonData['getblocksfound']['data'][0]['shares']) + ' | Confirmations: ' + str(jsonData['getblocksfound']['data'][0]['confirmations']) + ' | Solved By: ' + str(jsonData['getblocksfound']['data'][0]['finder'])
