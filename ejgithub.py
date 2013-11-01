@@ -5,10 +5,10 @@ import daemon, lockfile
 working_directory = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(1, working_directory + '/classes')
 sys.path.insert(1, working_directory + '/lib')
+import settings
 from irc import *
 from blockupdate import *
 from commands import *
-import settings
 
 # Load our local configuration
 config = ConfigParser.RawConfigParser()
@@ -17,7 +17,7 @@ if not config.read(working_directory + '/conf/config.cfg'):
 settings = settings.load(config)
 
 # Ensure some paths exist
-logfile = config.get('Logging', 'file')
+logfile = working_directory + '/' + config.get('Logging', 'file')
 if not os.path.exists(os.path.dirname(logfile)):
     os.makedirs(os.path.dirname(logfile))
 
@@ -38,7 +38,7 @@ def reload_program_config(signum, stack):
     logger.info('Reloading bot configuration')
     commands.rehash()
 
-def _do_():
+def main():
     global commands
     logger = logging.getLogger('bot.worker')
     logger.info('Entering bot worker process')
@@ -55,7 +55,7 @@ def _do_():
     blockupdate = BlockUpdate()
     blockupdate.setConfig(settings)
 
-    # Create IRC Object and runn connect
+    # Create IRC Object and run connect
     irc = IRC()
     irc.connect(settings['host'], settings['port'])
     irc.nick(settings['nick'])
@@ -64,8 +64,6 @@ def _do_():
 
     logger.info('Entering process loop')
     while True:
-        logger.debug('Re-entered while loop')
-
         # Holds our lines returned from socket
         data = {}
 
@@ -92,28 +90,34 @@ def _do_():
                 irc.pong(line)
             elif commands.check(line):
                 try:
-                    irc.send(commands.run())
+                    data = commands.run()
+                    if data:
+                        irc.send(data)
                 except Exception as exception:
                     logger.exception('Command execution failed:')
         time.sleep(0.5)
 
 def run():
     try:
+        logger.debug('Creating daemon context')
         context = daemon.DaemonContext(
             files_preserve=[fh.stream],
             pidfile=lockfile.FileLock(working_directory + '/ejbot.pid'),
             working_directory='./'
             )
+        logger.debug('Creating daemon signal map')
         context.signal_map = {
             signal.SIGUSR1: reload_program_config
             }
     except:
         logger.exception('Failed to create daemon context')
+    logger.debug('Running main service in daemon context')
     with context:
         try:
-            _do_()
+            main()
         except:
-            logger.exception('Failed to run worker process')
+            logger.exception('Failed to start worker process')
+            context.close()
 
 if __name__ == "__main__":
     run()

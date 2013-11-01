@@ -5,15 +5,25 @@ import locale
 
 def status_run_cmd(line, config):
     locale.setlocale(locale.LC_ALL, 'en_US')
-    logger = logging.getLogger()
+    logger = logging.getLogger('bot.cmd.status')
+    logger.debug('Opening URL for status command')
     url = urllib.urlopen(config['api_url'] + '&action=getpoolstatus&api_key=' + config['api_key'])
-    jsonData = json.loads(urllib.urlopen(config['api_url'] + '&action=getpoolstatus&api_key=' + config['api_key']).read())
-    jsonPublicData = json.loads(urllib.urlopen(config['api_url'] + '&action=public').read())
+    if url.getcode() != 200:
+        logger.error('Request failed with http error: ' + str(url.getcode()))
+        return False
+    logger.debug('Reading JSON data from response')
+    jsonData = json.loads(url.read())
+    urlpublic = urllib.urlopen(config['api_url'] + '&action=public')
+    if urlpublic.getcode() != 200:
+        logger.error('Request failed with http error: ' + str(url.getcode()))
+        return False
+    jsonPublicData = json.loads(urlpublic.read())
     strEfficiency = str(jsonData['getpoolstatus']['data']['efficiency']) + '%'
     strDifficulty = str(round(jsonData['getpoolstatus']['data']['networkdiff'], 3))
-    strRoundEstimate = str(locale.format('%d', round(jsonData['getpoolstatus']['data']['estshares'], 0), grouping=True))
-    strCurrentRound = str(locale.format('%d', round(jsonPublicData['shares_this_round'], 0), grouping=True))
+    strRoundEstimate = str(int(jsonData['getpoolstatus']['data']['estshares']))
+    strCurrentRound = str(int(jsonPublicData['shares_this_round']))
     strHashrate = str(locale.format('%d', round(jsonPublicData['hashrate'], 2), grouping=True))
     strPoolLuck = str(round(jsonPublicData['shares_this_round'] / jsonData['getpoolstatus']['data']['estshares'] * 100, 2))
     strWorkers = str(jsonPublicData['workers'])
+    logger.info('Completed command')
     return 'PRIVMSG ' + config['channel'] + ' :Pool Hashrate: ' + strHashrate + ' khash | Pool Efficiency: ' + strEfficiency + ' | Current difficulty: ' + strDifficulty + ' | Round Estimate: ' + strRoundEstimate + ' | Current Round: ' + strCurrentRound + ' | Pool Luck: ' + strPoolLuck + '% | Workers: ' + strWorkers
