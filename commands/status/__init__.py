@@ -4,7 +4,7 @@ import json
 import locale
 
 def status_run_cmd(line, config):
-    locale.setlocale(locale.LC_ALL, 'en_US')
+    locale.setlocale(locale.LC_ALL, 'en_US.utf8')
     logger = logging.getLogger('bot.cmd.status')
     logger.debug('Opening URL for status command')
     url = urllib.urlopen(config['api_url'] + '&action=getpoolstatus&api_key=' + config['api_key'])
