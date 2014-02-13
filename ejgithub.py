@@ -60,6 +60,7 @@ def main():
     irc.connect(settings['host'], settings['port'])
     irc.nick(settings['nick'])
     irc.user(settings['user'])
+    irc.send('ns IDENTIFY ' + settings['nick'] + ' ' + settings['pass'])
     irc.join(settings['channel'])
 
     logger.info('Entering process loop')
