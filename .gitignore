@@ -1,3 +1,6 @@
 /conf/config.cfg
 /log
 /*.lock
+/*.pid
+*.swp
+*.pyc
