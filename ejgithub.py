@@ -1,6 +1,6 @@
 #!/usr/bin/python -B
 import os, sys, ConfigParser, logging, signal, string, time
-import daemon, lockfile
+from daemon import runner
 
 working_directory = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(1, working_directory + '/classes')
@@ -97,27 +97,32 @@ def main():
                     logger.exception('Command execution failed:')
         time.sleep(0.5)
 
-def run():
-    try:
-        logger.debug('Creating daemon context')
-        context = daemon.DaemonContext(
-            files_preserve=[fh.stream],
-            pidfile=lockfile.FileLock(working_directory + '/ejbot.pid'),
-            working_directory='./'
-            )
-        logger.debug('Creating daemon signal map')
-        context.signal_map = {
-            signal.SIGUSR1: reload_program_config
-            }
-    except:
-        logger.exception('Failed to create daemon context')
-    logger.debug('Running main service in daemon context')
-    with context:
+
+class App():
+    """
+        Daemon runner application class
+    """
+    def __init__(self):
+        self.stdin_path = '/dev/null'
+        self.stdout_path = '/dev/null'
+        self.stderr_path = '/dev/null'
+        self.pidfile_path =  working_directory + '/bot.pid'
+        self.pidfile_timeout = 5
+
+    def run(self):
+        logger.debug('Created daemon context')
         try:
             main()
         except:
-            logger.exception('Failed to start worker process')
-            context.close()
+            logger.debug('Failed to execute main run loop')
 
-if __name__ == "__main__":
-    run()
+
+if __name__ == '__main__':
+    app = App()
+    daemon_runner = runner.DaemonRunner(app)
+    daemon_runner.daemon_context.working_directory = working_directory
+    daemon_runner.daemon_context.files_preserve = [fh.stream]
+    daemon_runner.daemon_context.signal_map = {
+        signal.SIGUSR1: reload_program_config
+    }
+    daemon_runner.do_action()
