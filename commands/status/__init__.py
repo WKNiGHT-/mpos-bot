@@ -23,7 +23,7 @@ def status_run_cmd(line, config):
     strRoundEstimate = str(int(jsonData['getpoolstatus']['data']['estshares']))
     strCurrentRound = str(int(jsonPublicData['shares_this_round']))
     strHashrate = str(locale.format('%d', round(jsonPublicData['hashrate'], 2), grouping=True))
-    strPoolLuck = str(round(jsonPublicData['shares_this_round'] / jsonData['getpoolstatus']['data']['estshares'] * 100, 2))
+    strPoolLuck = str(round(jsonData['getpoolstatus']['data']['progress'], 2))
     strWorkers = str(jsonPublicData['workers'])
     logger.info('Completed command')
     return 'PRIVMSG ' + config['channel'] + ' :Pool Hashrate: ' + strHashrate + ' khash | Pool Efficiency: ' + strEfficiency + ' | Current difficulty: ' + strDifficulty + ' | Round Estimate: ' + strRoundEstimate + ' | Current Round: ' + strCurrentRound + ' | Round: ' + strPoolLuck + '% | Workers: ' + strWorkers
